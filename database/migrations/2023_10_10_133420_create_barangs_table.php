@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('stock');
             $table->text('images');
             $table->unsignedBigInteger('supplier_id');
+            $table->string('tgl_keluar')->nullable();
             $table->timestamps();
             $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
         });

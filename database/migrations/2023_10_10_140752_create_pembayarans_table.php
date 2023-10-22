@@ -16,8 +16,9 @@ return new class extends Migration
         Schema::create('pembayarans', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('transaksi_id');
-            $table->date('tgl_bayar');
+            $table->date('tgl_bayar')->nullable();
             $table->string('total_bayar');
+            $table->text('bukti_transfer')->nullable();
             $table->string('keterangan');
             $table->timestamps();
             $table->foreign('transaksi_id')->references('id')->on('transaksis')->onDelete('cascade');

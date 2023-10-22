@@ -56,7 +56,7 @@
                     <div class="card-header pb-0">
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                             data-bs-target="#exampleModal">
-                            Tambah Barang
+                            Tambah @yield('title')
                         </button>
 
                     </div>
@@ -65,6 +65,11 @@
                         <div class="table-responsive p-0">
                             <table class="table align-items-center mb-0">
                                 <thead>
+                                    @if (session()->has('message'))
+                                            <div class="alert alert-success">
+                                                {{ session()->get('message') }}
+                                            </div>
+                                        @endif
                                     <tr>
                                         <th
                                             class="text-uppercase text-secondary text-xm font-weight-bolder text-center">
@@ -81,16 +86,21 @@
                                             class="text-center text-uppercase text-secondary text-xm font-weight-bolder opacity-7">
                                             tanggal masuk</th>
                                         <th
+                                        <th
+                                            class="text-center text-uppercase text-secondary text-xm font-weight-bolder opacity-7">
+                                            tanggal keluar</th>
+                                        <th
                                             class="text-center text-uppercase text-secondary text-xm font-weight-bolder opacity-7">
                                             supplier</th>
                                         <th
                                             class="text-text-left text-uppercase text-secondary text-xm font-weight-bolder opacity-7">
                                             Action</th>
 
+
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($barang as $no => $item)
+                                    @forelse ($barang as $no => $item)
                                     <tr>
                                         <td>
                                             <div>
@@ -112,9 +122,12 @@
                                             <p class="text-xm font-weight-bold mb-0">{{ $item->category }}</p>
                                         </td>
                                         <td class="align-middle text-center text-xm">
-                                            @if ($item->stock >= 5)
+                                            @if ($item->stock >= 5 && $item->category == 'Tembakau')
                                             <span class="badge badge-xm bg-gradient-success">{{ $item->stock }}
                                                 ons</span>
+                                            @elseif ($item->stock >= 5 && $item->category == 'Barang')
+                                                <span class="badge badge-xm bg-gradient-danger">{{ $item->stock }}
+                                                    buah</span>
                                             @else
                                             <span class="badge badge-xm bg-gradient-danger">{{ $item->stock }}
                                                 ons</span>
@@ -125,6 +138,10 @@
                                                 $item->created_at->format('d / m / Y') }}</span>
                                         </td>
                                         <td class="align-middle text-center">
+                                            <span class="text-secondary text-xm font-weight-bold">{{
+                                                $item->tgl_keluar }}</span>
+                                        </td>
+                                        <td class="align-middle text-center">
                                             <p class="text-xm font-weight-bold mb-0">{{ $item->supplier->nama_supplier }}</p>
                                         </td>
                                         <td class="align-middle">
@@ -133,17 +150,28 @@
                                                 Edit
                                             </a>
                                             <span>|</span>
-                                            <a class="text-primary text-left font-weight-bold text-xm" href=""
+                                            <a class="text-primary text-left font-weight-bold text-xm" href="{{ route('delete.barang', ['id' => $item->id]) }}"
                                                 onclick="return confirm('Are you sure ?')">
                                                 Delete
                                             </a>
                                         </td>
-
                                     </tr>
-
-                                    @endforeach
+                                    @empty
+                                   <tr>
+                                        <td colspan="8">
+                                            <div class="alert alert-danger text-white">
+                                                Data is Empty
+                                            </div>
+                                        </td>
+                                   </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="card-footer">
+                            <div class="pagen">
+                                {{ $barang->links('layout.paginate') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -186,17 +214,19 @@
                     <img src="{{ asset('storage/barang/' . $edit->images) }}" class="me-4 mb-4"
                         alt="{{ $edit->images }}" style="width: 120px; height: 120px;">
                 </div>
-                <form method="post" action="" enctype="multipart/form-data">
+                <form method="post" action="{{ route('edit.barang') }}" enctype="multipart/form-data">
                     @csrf
+                    @method('PUT')
                     <div class="row">
+                        <input type="hidden" name="id" value="{{ $edit->id }}">
                         <div class="col-lg-12">
                             <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Nama Barang" name="name" value="{{ $edit->nama_barang }}">
+                                <input type="text" class="form-control" placeholder="Nama Barang" name="nama_barang" value="{{ $edit->nama_barang }}">
                             </div>
                         </div>
                         <div class="col-lg-12">
                             <div class="form-group">
-                                <input type="file" class="form-control" placeholder="Image" name="image">
+                                <input type="file" class="form-control" placeholder="Image" name="images">
                             </div>
                         </div>
                         <div class="col-lg-4">
@@ -209,18 +239,21 @@
                         </div>
                         <div class="col-lg-4">
                             <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Price" name="price" value="Rp. {{ $edit->harga }}">
+                                <input type="text" class="form-control" placeholder="Price" name="harga" value="{{ $edit->harga }}">
                             </div>
                         </div>
                         <div class="col-lg-4">
                             <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Stock" name="stock" value="{{ $edit->stock }} ons">
+                                <input type="text" class="form-control" placeholder="Stock" name="stock" value="{{ $edit->stock }}">
                             </div>
                         </div>
                         <div class="col-lg-12">
                             <div class="form-group">
-                                <select class="form-control" name="category">
-                                    <option>-- Supplier --</option>
+                                <select class="form-control" name="supplier">
+                                    <option value="{{ $edit->supplier_id }}">{{ $edit->supplier->nama_supplier }}</option>
+                                    @foreach ($supplier as $sup)
+                                    <option value="{{ $sup->id }}">{{ $sup->nama_supplier }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -265,6 +298,7 @@
                                 <select class="form-control" name="category">
                                     <option>-- Category --</option>
                                     <option>Tembakau</option>
+                                    <option>Barang</option>
 
                                 </select>
                             </div>

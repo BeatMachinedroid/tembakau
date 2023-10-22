@@ -12,7 +12,8 @@ class barang extends Model
         'harga',
         'stock',
         'supplier_id',
-        'category'
+        'category',
+        'tgl_keluar'
     ];
 
     use HasFactory;

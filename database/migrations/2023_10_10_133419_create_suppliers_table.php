@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_supplier');
             $table->string('no_telp');
+            $table->string('jk');
             $table->string('alamat');
             $table->timestamps();
         });

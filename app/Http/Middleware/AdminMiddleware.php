@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 
 class AdminMiddleware
 {
-    // public function handle(Request $request, Closure $next)
-    // {
-    //     if ($request->user() && $request->user()->isAdmin()) {
-    //         return $next($request);
-    //     }
+    public function handle(Request $request, Closure $next)
+    {
+        if ($request->user()) {
+            return $next($request);
+        }
 
-    //     return redirect('login');
-    // }
+        return redirect()->route('login');
+    }
 }
